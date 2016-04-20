@@ -1,0 +1,41 @@
+- hosts: digitalocean
+
+  vars:
+    do_token: "{{ lookup('env','DO_API_TOKEN') }}"
+    user: "{{ lookup('env','USER') }}"
+    root_dir: "{{ lookup('env','PWD') }}"
+
+  tasks:
+    - name: ensure ssh key exists
+      user: >
+        name="{{ user }}"
+        generate_ssh_key=yes
+        ssh_key_file=.ssh/id_rsa
+
+    - name: ensure ssh key exists at DigitalOcean
+      digital_ocean: >
+        state=present
+        command=ssh
+        name=mbp
+        ssh_pub_key="{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+        api_token="{{ do_token }}"
+      register: my_ssh_key
+
+    - name: ensure droplet is present
+      digital_ocean: >
+        state=present
+        command=droplet
+        unique_name=yes
+        name="{{ item.key }}"
+        size_id="{{ item.value.size }}"
+        region_id="{{ item.value.region }}"
+        image_id="{{ item.value.image }}"
+        ssh_key_ids="{{ my_ssh_key.ssh_key.id }}"
+        api_token="{{ do_token }}"
+      with_dict: "{{ droplets }}"
+      register: "all_drops"
+
+    - name: append to inventory
+      local_action: >
+        lineinfile dest="{{ root_dir }}/hosts" line="{{ item.droplet.ip_address }} hostname={{ item.droplet.name }}"
+      with_items: "{{ all_drops.results }}"
