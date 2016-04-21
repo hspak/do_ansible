@@ -3,3 +3,4 @@ droplets:
     size: "512mb"
     region: "sfo1"
     image: "centos-7-0-x64"
+    state: "present"

@@ -32,10 +32,12 @@
         image_id="{{ item.value.image }}"
         ssh_key_ids="{{ my_ssh_key.ssh_key.id }}"
         api_token="{{ do_token }}"
+      when: item.value.state == "present"
       with_dict: "{{ droplets }}"
       register: "all_drops"
 
     - name: append to inventory
       local_action: >
         lineinfile dest="{{ root_dir }}/hosts" line="{{ item.droplet.ip_address }} hostname={{ item.droplet.name }}"
+      when: item.item.value.state == "present"
       with_items: "{{ all_drops.results }}"
