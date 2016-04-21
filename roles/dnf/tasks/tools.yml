@@ -1,0 +1,5 @@
+- name: install useful tools
+  dnf: >
+    name="{{ item }}"
+    state=latest
+  with_items: "{{ tools }}"

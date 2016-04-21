@@ -1,0 +1,7 @@
+- name: ensure sudo is installed
+  dnf: >
+    name=sudo
+    state=present
+
+- name: uncomment wheel group
+  lineinfile: "dest=/etc/sudoers state=present regexp='^%wheel' line='%wheel ALL=(ALL) NOPASSWD: ALL'"

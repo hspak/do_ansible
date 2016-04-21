@@ -1,0 +1,9 @@
+- name: setup EPEL repository
+  yum:
+    name=epel-release
+    state=latest
+
+- name: install dnf
+  yum: >
+    name=dnf
+    state=latest

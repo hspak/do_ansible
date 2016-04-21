@@ -1,0 +1,28 @@
+- name: create users
+  user: >
+    name={{ item }}
+    state=present
+    groups=wheel,adm,systemd-journal
+    shell=/bin/bash
+  with_items: "{{ users }}"
+
+- name: ensure ssh directory is present for each user
+  file: >
+    path=/home/{{ item }}/.ssh
+    state=directory
+  with_items: "{{ users }}"
+
+- name: set authorized_keys for each user
+  copy: >
+    src=public_keys/{{ item }}.pub
+    dest=/home/{{ item }}/.ssh/authorized_keys
+  with_items: "{{ users }}"
+
+- name: set correct permissinos for authorized_keys
+  file: >
+    path=/home/{{ item }}/.ssh/authorized_keys
+    state=file
+    owner="{{ item }}"
+    group=users
+    mode=0600
+  with_items: "{{ users }}"
